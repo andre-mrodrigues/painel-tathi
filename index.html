@@ -244,7 +244,7 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
       <div>
         <div class="eyebrow">AW Corp × Instituto Deândhela</div>
         <h1>Projeto Tathi Deândhela · <em>Gigantes no Palco</em></h1>
-        <div class="sub">Acompanhamento das entregas. Tudo rodando até 01/11. <span class="versao" title="Versão do painel">v23.10-c</span></div>
+        <div class="sub">Acompanhamento das entregas. Tudo rodando até 01/11. <span class="versao" title="Versão do painel">v23.10-d</span></div>
       </div>
     </div>
     <div class="top-right">
@@ -347,6 +347,7 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
       <div class="r">
         <button class="btn" data-close type="button" id="btn-cancel">Fechar</button>
         <button class="btn primary admin-only" id="btn-save" type="button" hidden>Salvar</button>
+        <button class="btn primary" id="btn-edit" type="button" hidden>Editar demanda</button>
       </div>
     </div>
   </div>
@@ -505,6 +506,7 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
       if (!t) { $("login-err").textContent = "E-mail ou senha incorretos."; return; }
       token = t; try { localStorage.setItem(TOKEN_KEY, t); } catch {}
       fecharOverlay("ov-login"); setAdmin(true); toast("Você está no modo admin");
+      if (draft && !$("ov-card").hidden) preencher(); // card aberto passa direto para edição
       if (marcoPendente != null) { const i = marcoPendente; marcoPendente = null; if (projeto.marcos && projeto.marcos[i]) alternarMarco(i); }
     } catch (err) { $("login-err").textContent = msgErro(err); }
     finally { btn.disabled = false; btn.textContent = "Entrar"; }
@@ -793,7 +795,7 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
     renderLinks(); renderCheck();
     $("btn-del").hidden = !editingId || ro;
     $("confirm-del").classList.remove("open");
-    $("btn-save").hidden = ro;
+    $("btn-save").hidden = ro; $("btn-edit").hidden = !ro;
     $("btn-cancel").textContent = ro ? "Fechar" : "Cancelar";
     $("stamp").textContent = draft.updatedAt ? "Atualizado em " + fmtDataHora(draft.updatedAt) : "";
     abrirOverlay("ov-card");
@@ -828,6 +830,7 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
       box.append(row);
     });
   }
+  $("btn-edit").onclick = () => { abrirLogin(); toast("Entre como admin para editar"); };
   $("btn-add-link").onclick = () => { draft.links.push({ label: "", url: "" }); renderLinks(); const ins = $("f-links").querySelectorAll("input[type=text]"); ins[ins.length - 1].focus(); };
   $("btn-add-check").onclick = () => { draft.checklist.push({ text: "", done: false }); renderCheck(); const ins = $("f-check").querySelectorAll("input[type=text]"); ins[ins.length - 1].focus(); };
   $("btn-save").onclick = async () => {
