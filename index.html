@@ -18,6 +18,7 @@
 h1 { margin: 2px 0 0; font-family: var(--display); font-weight: 500; font-size: clamp(26px, 3.4vw, 38px); line-height: 1.05; letter-spacing: -.01em; text-wrap: balance; }
 h1 em { font-style: italic; color: var(--accent-ink); }
 .sub { color: var(--muted); margin-top: 4px; font-size: 13px; }
+.versao { opacity: .55; font-size: 11px; margin-left: 6px; white-space: nowrap; }
 .top-right { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
 @media (max-width: 700px) { .top-right { align-items: stretch; width: 100%; } }
 .countdowns { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -40,8 +41,10 @@ h1 em { font-style: italic; color: var(--accent-ink); }
 .tl-item { position: relative; padding: 16px 18px 0 0; min-width: 122px; max-width: 168px; }
 .tl-item::before { content: ""; position: absolute; left: 0; right: 0; top: 6px; height: 1px; background: var(--line-2); }
 .tl-dot { position: absolute; left: 0; top: 0; width: 13px; height: 13px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--muted); padding: 0; display: grid; place-items: center; }
-button.tl-dot { cursor: pointer; }
-button.tl-dot:hover { transform: scale(1.2); }
+/* A bolinha clicável tem uma área de toque maior que o desenho. */
+.tl-btn { position: absolute; left: -8px; top: -8px; width: 29px; height: 29px; padding: 0; border: 0; background: none; cursor: pointer; border-radius: 50%; }
+.tl-btn .tl-dot { left: 8px; top: 8px; transition: transform .12s, border-color .12s; }
+.tl-btn:hover .tl-dot { transform: scale(1.25); border-color: var(--ok); }
 .tl-item.key .tl-dot { border-color: var(--accent); }
 .tl-item.done .tl-dot { background: var(--ok); border-color: var(--ok); }
 .tl-item.done .tl-dot::after { content: ""; width: 5px; height: 3px; border-left: 1.5px solid var(--bg); border-bottom: 1.5px solid var(--bg); transform: rotate(-45deg) translate(0, -1px); }
@@ -241,7 +244,7 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
       <div>
         <div class="eyebrow">AW Corp × Instituto Deândhela</div>
         <h1>Projeto Tathi Deândhela · <em>Gigantes no Palco</em></h1>
-        <div class="sub">Acompanhamento das entregas. Tudo rodando até 01/11.</div>
+        <div class="sub">Acompanhamento das entregas. Tudo rodando até 01/11. <span class="versao" title="Versão do painel">v23.10-b</span></div>
       </div>
     </div>
     <div class="top-right">
@@ -502,6 +505,7 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
       if (!t) { $("login-err").textContent = "E-mail ou senha incorretos."; return; }
       token = t; try { localStorage.setItem(TOKEN_KEY, t); } catch {}
       fecharOverlay("ov-login"); setAdmin(true); toast("Você está no modo admin");
+      if (marcoPendente != null) { const i = marcoPendente; marcoPendente = null; if (projeto.marcos && projeto.marcos[i]) alternarMarco(i); }
     } catch (err) { $("login-err").textContent = msgErro(err); }
     finally { btn.disabled = false; btn.textContent = "Entrar"; }
   });
@@ -518,7 +522,7 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
   function fecharOverlay(id) {
     $(id).hidden = true;
     if ([...document.querySelectorAll(".overlay")].every(o => o.hidden)) document.body.style.overflow = "";
-    if (id === "ov-card") { editingId = null; draft = null; }
+    if (id === "ov-card") { editingId = null; draft = null; if (location.hash.startsWith("#d=")) history.replaceState(null, "", location.pathname + location.search); }
     if (id === "ov-cfg") cfgDraft = null;
   }
   document.querySelectorAll(".overlay").forEach(ov => {
@@ -555,13 +559,17 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
         tl.append(el("div", { class: "tl-item today" }, el("span", { class: "tl-dot" }), el("div", { class: "tl-date", text: "Hoje" }), el("div", { class: "tl-label", text: fmt(hojeISO()) })));
         hojePosto = true;
       }
-      const dot = isAdmin
-        ? el("button", { class: "tl-dot", type: "button", title: m.concluido ? "Marcar como pendente" : "Marcar como concluído", "aria-pressed": String(!!m.concluido), "aria-label": (m.concluido ? "Desmarcar " : "Concluir ") + m.rotulo, onclick: () => alternarMarco(i) })
-        : el("span", { class: "tl-dot", title: m.concluido ? "Concluído" : "Pendente" });
+      // Qualquer um pode clicar; quem não está como admin é levado ao login e o marco é marcado logo depois de entrar.
+      const dot = el("button", { class: "tl-btn", type: "button", "aria-pressed": String(!!m.concluido),
+        title: !isAdmin ? (m.concluido ? "Concluído" : "Pendente") + " · entre como admin para alterar" : m.concluido ? "Marcar como pendente" : "Marcar como concluído",
+        "aria-label": (m.concluido ? "Desmarcar " : "Concluir ") + m.rotulo,
+        onclick: () => { if (isAdmin) alternarMarco(i); else { marcoPendente = i; abrirLogin(); toast("Entre como admin para concluir o marco"); } } },
+        el("span", { class: "tl-dot" }));
       tl.append(el("div", { class: "tl-item" + (m.destaque ? " key" : "") + (m.concluido ? " done" : "") },
         dot, el("div", { class: "tl-date", text: m.quando || fmt(m.data) }), el("div", { class: "tl-label", text: m.rotulo })));
     });
   }
+  let marcoPendente = null;
   async function alternarMarco(i) {
     const novo = JSON.parse(JSON.stringify(projeto));
     novo.marcos[i].concluido = !novo.marcos[i].concluido;
@@ -735,9 +743,19 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
   $("f-status").append(...STATUSES.map(s => el("option", { value: s.id, text: s.label })));
   function abrirCard(id) {
     const c = cards[id]; if (!c) return;
-    editingId = id; draft = JSON.parse(JSON.stringify(c));
-    preencher();
+    try {
+      editingId = id; draft = JSON.parse(JSON.stringify(c));
+      preencher();
+      if (location.hash !== "#d=" + id) history.replaceState(null, "", "#d=" + id);
+    } catch (e) { toast("Erro ao abrir o card: " + (e && e.message || e)); throw e; }
   }
+  // Link direto para um card: painel.../#d=<id>
+  function abrirPeloLink() {
+    const m = /^#d=(.+)$/.exec(location.hash); if (!m) return;
+    const id = decodeURIComponent(m[1]);
+    if (cards[id] && editingId !== id) abrirCard(id);
+  }
+  window.addEventListener("hashchange", abrirPeloLink);
   function novoCard(status) {
     editingId = null;
     draft = { title: "", status: status || "afazer", owner: filtroOwner !== "todos" && filtroOwner !== "Sem responsável" ? filtroOwner : "", due: "", priority: "media", tags: [], briefing: "", links: [], checklist: [] };
@@ -947,6 +965,9 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
       });
   }
 
+  // Qualquer erro de script aparece na tela, para sabermos o que travou.
+  window.addEventListener("error", e => toast("Erro: " + (e.message || "desconhecido")));
+  window.addEventListener("unhandledrejection", e => toast("Erro: " + ((e.reason && e.reason.message) || e.reason || "desconhecido")));
   renderAdminBar();
   render();
   (async function iniciar() {
@@ -955,6 +976,7 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
       loaded = true; render();
       aviso(el("div", { class: "notice" }, el("b", { text: "Não consegui carregar as demandas. " }), "Confira a internet e recarregue a página."));
     }
+    abrirPeloLink();
     conectar();
     setInterval(() => { if (document.visibilityState === "visible") carregar().catch(() => {}); }, 60000);
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") carregar().catch(() => {}); });
