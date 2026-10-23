@@ -145,6 +145,16 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
 @media (max-width: 520px) { .lrow { grid-template-columns: minmax(0, 1fr) auto auto; } .lrow .lurl { grid-column: 1 / -1; grid-row: 2; } }
 .go { text-decoration: none; color: var(--accent-ink); padding: 6px 8px; font-weight: 700; }
 .go[aria-disabled="true"] { opacity: .3; pointer-events: none; }
+.cfoot .ent { color: var(--ok); font-weight: 600; }
+.hint { margin: 0 0 8px; color: var(--muted); font-size: 12.5px; }
+.entrega-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 6px; margin-top: 8px; }
+.entrega-form .e-url { grid-column: 1 / -1; grid-row: 2; }
+.entrega-form .e-obs { grid-column: 1 / 3; grid-row: 3; }
+.entrega-form .btn { grid-column: 3; grid-row: 1; }
+@media (max-width: 520px) { .entrega-form { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .entrega-form .e-obs { grid-column: 1 / -1; } .entrega-form .btn { grid-column: 1 / -1; grid-row: 4; } }
+.erow { display: flex; gap: 8px; align-items: center; }
+.erow .vlink { flex: 1; }
+.erow .meta-e { display: block; font-size: 11.5px; color: var(--muted); font-weight: 400; white-space: normal; }
 .vlink { display: flex; gap: 8px; align-items: center; text-decoration: none; padding: 8px 10px; border: 1px solid var(--line-2); background: var(--surface); min-width: 0; }
 .vlink:hover { border-color: var(--accent); }
 .vlink span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; flex: 1; min-width: 0; }
@@ -244,7 +254,7 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
       <div>
         <div class="eyebrow">AW Corp × Instituto Deândhela</div>
         <h1>Projeto Tathi Deândhela · <em>Gigantes no Palco</em></h1>
-        <div class="sub">Acompanhamento das entregas. Tudo rodando até 01/11. <span class="versao" title="Versão do painel">v23.10-d</span></div>
+        <div class="sub">Acompanhamento das entregas. Tudo rodando até 01/11. <span class="versao" title="Versão do painel">v23.10-e</span></div>
       </div>
     </div>
     <div class="top-right">
@@ -312,6 +322,20 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
           <div class="lbl">Links (docs prontos, referências, pastas)</div>
           <div class="rows" id="f-links"></div>
           <button class="link-btn admin-only" id="btn-add-link" type="button" hidden>+ Adicionar link</button>
+        </div>
+        <div class="field entregas" id="f-entregas-box">
+          <div class="lbl">Entregas do time</div>
+          <p class="hint">Terminou sua parte? Cole aqui o link: doc da copy, página, edição no Drive, bruto da captação. Não precisa de login.</p>
+          <div class="rows" id="f-entregas"></div>
+          <form class="entrega-form" id="form-entrega">
+            <input type="text" id="e-nome" list="owners-list" placeholder="Seu nome" aria-label="Seu nome" required maxlength="80">
+            <select id="e-tipo" aria-label="Tipo de entrega">
+              <option>Copy</option><option>Página</option><option>Edição de vídeo</option><option>Bruto da captação</option><option>Criativo</option><option>Documento</option><option>Outro</option>
+            </select>
+            <input type="url" id="e-url" class="e-url" placeholder="Cole o link (Drive, Docs, Figma, página...)" aria-label="Link da entrega" required maxlength="1000">
+            <input type="text" id="e-obs" class="e-obs" placeholder="Observação (opcional)" aria-label="Observação" maxlength="300">
+            <button class="btn primary" id="btn-entregar" type="submit">Entregar</button>
+          </form>
         </div>
         <div class="field">
           <div class="lbl">Checklist</div>
@@ -427,6 +451,11 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
     sessao_expirada: "Sua sessão expirou. Entre de novo.",
     senha_curta: "A senha precisa ter pelo menos 8 caracteres.",
     muitas_tentativas: "Muitas tentativas erradas. Espere 10 minutos e tente de novo.",
+    link_invalido: "Cole um link completo, começando com https://",
+    campos_obrigatorios: "Preencha seu nome e o link.",
+    muitas_entregas: "Este card já tem entregas demais. Fale com o André.",
+    muitos_pedidos: "Muitos envios seguidos. Espere alguns minutos.",
+    card_nao_encontrado: "Esta demanda não existe mais.",
   };
 
   const cfg = window.PAINEL_CONFIG;
@@ -663,6 +692,7 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
         el("span", { class: "owner-name" + (c.owner ? "" : " none"), text: c.owner || "Sem responsável" }),
         chk.length ? el("span", { title: "Checklist", text: "☑ " + feitos + "/" + chk.length }) : null,
         (c.links || []).length ? el("span", { title: "Links", text: "↗ " + c.links.length }) : null,
+        (c.entregas || []).length ? el("span", { class: "ent", title: "Entregas do time", text: "✓ " + c.entregas.length + (c.entregas.length === 1 ? " entrega" : " entregas") }) : null,
         c.due ? el("span", { class: "due" + dueCls, text: (d != null && d < 0 && aberto ? "atrasou · " : "") + fmt(c.due) })
           : (c.prazoDesejado ? el("span", { class: "due", title: "Prazo desejado por quem pediu", text: "pedido p/ " + fmt(c.prazoDesejado) }) : null)));
     return node;
@@ -792,7 +822,11 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
         draft.contato ? el("div", { text: "Contato: " + draft.contato }) : null);
     }
     draft.links = draft.links || []; draft.checklist = draft.checklist || [];
-    renderLinks(); renderCheck();
+    draft.entregas = draft.entregas || []; entregasRemovidas = new Set();
+    renderLinks(); renderCheck(); renderEntregas();
+    $("f-entregas-box").hidden = !editingId;
+    if (!$("e-nome").value) { let n = ""; try { n = localStorage.getItem("painel_tathi_nome") || ""; } catch {} $("e-nome").value = n || draft.owner || ""; }
+    $("e-url").value = ""; $("e-obs").value = "";
     $("btn-del").hidden = !editingId || ro;
     $("confirm-del").classList.remove("open");
     $("btn-save").hidden = ro; $("btn-edit").hidden = !ro;
@@ -818,6 +852,40 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
         el("button", { class: "icon-btn", type: "button", "aria-label": "Remover link", onclick: () => { draft.links.splice(i, 1); renderLinks(); } }, "×")));
     });
   }
+  let entregasRemovidas = new Set();
+  const chaveEntrega = e => (e.em || "") + "|" + (e.url || "");
+  function renderEntregas() {
+    const box = $("f-entregas"); box.replaceChildren();
+    const lista = draft.entregas.filter(e => !entregasRemovidas.has(chaveEntrega(e)));
+    if (!lista.length) box.append(el("div", { class: "col-empty", style: "padding:2px 0", text: "Nenhuma entrega ainda." }));
+    lista.slice().reverse().forEach(e => {
+      const href = safeUrl(e.url);
+      box.append(el("div", { class: "erow" },
+        el("a", { class: "vlink", href: href || "#", target: "_blank", rel: "noopener", title: e.url },
+          el("span", null, (e.tipo ? e.tipo + " · " : "") + (e.nome || "Sem nome"),
+            el("small", { class: "meta-e", text: (e.em ? fmtDataHora(e.em) : "") + (e.obs ? " · " + e.obs : "") })),
+          el("b", { class: "go", text: "↗" })),
+        isAdmin ? el("button", { class: "icon-btn", type: "button", "aria-label": "Remover entrega", title: "Remover (vale ao salvar)", onclick: () => { entregasRemovidas.add(chaveEntrega(e)); renderEntregas(); } }, "×") : null));
+    });
+  }
+  $("form-entrega").addEventListener("submit", async ev => {
+    ev.preventDefault();
+    if (!editingId) return;
+    const id = editingId, btn = $("btn-entregar");
+    const nome = $("e-nome").value.trim(), url = $("e-url").value.trim();
+    if (!nome || !url) { toast(ERROS.campos_obrigatorios); return; }
+    if (!safeUrl(url)) { toast(ERROS.link_invalido); return; }
+    btn.disabled = true; btn.textContent = "Enviando...";
+    try {
+      const nova = await rpc("tathi_entregar", { p_id: id, p_nome: nome, p_tipo: $("e-tipo").value, p_url: url, p_obs: $("e-obs").value.trim() });
+      try { localStorage.setItem("painel_tathi_nome", nome); } catch {}
+      if (editingId === id && draft && nova && !draft.entregas.some(e => chaveEntrega(e) === chaveEntrega(nova))) { draft.entregas.push(nova); renderEntregas(); }
+      $("e-url").value = ""; $("e-obs").value = "";
+      agendarRecarga();
+      toast("Entrega registrada. Obrigado!");
+    } catch (err) { toast(msgErro(err)); }
+    finally { btn.disabled = false; btn.textContent = "Entregar"; }
+  });
   function renderCheck() {
     const box = $("f-check"); box.replaceChildren();
     if (!draft.checklist.length && !isAdmin) box.append(el("div", { class: "col-empty", style: "padding:2px 0", text: "Sem checklist." }));
@@ -846,6 +914,8 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
       briefing: $("f-brief").value,
       links: draft.links.filter(l => (l.url || "").trim() || (l.label || "").trim()).map(l => ({ label: (l.label || "").trim() || l.url, url: (l.url || "").trim() })),
       checklist: draft.checklist.filter(x => (x.text || "").trim()).map(x => ({ text: x.text.trim(), done: !!x.done })),
+      // Entregas: parte da versão mais nova (alguém pode ter entregue com o card aberto) e tira só as removidas aqui.
+      entregas: (((editingId && cards[editingId]) || draft).entregas || []).filter(e => !entregasRemovidas.has(chaveEntrega(e))),
       updatedAt: new Date().toISOString(),
     };
     if (!obj.order) obj.order = Date.now();
