@@ -1,0 +1,4 @@
+window.PAINEL_CONFIG = {
+  supabaseUrl: "https://lzqcblirtfgekbbefsss.supabase.co",
+  supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6cWNibGlydGZnZWtiYmVmc3NzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2MzUxNTQsImV4cCI6MjEwNjIxMTE1NH0.uOxrVH5twK5D_AoiSB23i3pq5Q019hy2819CghxKEQA"
+};

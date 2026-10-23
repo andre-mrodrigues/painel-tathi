@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Solicitar demanda · Projeto Tathi</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="aw.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;1,6..96,500&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="base.css">
+<style>
+/* Página única: cabeçalho institucional estreito e um formulário em coluna, com a nota de processo ao lado no desktop. */
+.page { max-width: 1040px; margin: 0 auto; padding-block: 28px 48px; }
+.head { display: flex; gap: 18px; align-items: center; padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+.head .rule { width: 1px; align-self: stretch; background: var(--line-2); }
+h1 { margin: 2px 0 0; font-family: var(--display); font-weight: 500; font-size: clamp(28px, 4vw, 40px); line-height: 1.05; text-wrap: balance; }
+h1 em { font-style: italic; color: var(--accent-ink); }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 36px; margin-top: 28px; align-items: start; }
+@media (max-width: 820px) { .layout { grid-template-columns: minmax(0, 1fr); gap: 24px; } .aside { order: -1; } }
+form { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.req { color: var(--accent-ink); }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 560px) { .two { grid-template-columns: minmax(0, 1fr); } }
+.seg { display: flex; border: 1px solid var(--line-2); border-radius: 4px; overflow: hidden; }
+.seg label { flex: 1; text-align: center; padding: 9px 6px; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--muted); margin: 0; letter-spacing: 0; text-transform: none; border-right: 1px solid var(--line-2); }
+.seg label:last-child { border-right: 0; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg input:checked + span { color: var(--on-accent); }
+.seg label:has(input:checked) { background: var(--accent); color: var(--on-accent); }
+.seg label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: -2px; }
+.lrow { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr) auto; gap: 6px; }
+@media (max-width: 520px) { .lrow { grid-template-columns: minmax(0, 1fr) auto; } .lrow .lurl { grid-column: 1 / -1; grid-row: 2; } }
+.rows { display: flex; flex-direction: column; gap: 6px; }
+.aside { border: 1px solid var(--line-2); background: var(--surface); padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.aside ol { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; color: var(--muted); }
+.aside ol b { color: var(--fg); font-weight: 600; }
+.aside a { color: var(--accent-ink); font-weight: 600; text-decoration: none; }
+.actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 18px; }
+.err { color: var(--late); font-size: 13px; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.done { border: 1px solid var(--accent); padding: 28px; display: flex; flex-direction: column; gap: 12px; }
+.done h2 { margin: 0; font-family: var(--display); font-weight: 500; font-size: 30px; }
+.done p { margin: 0; color: var(--muted); max-width: 52ch; }
+.done .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+
+/* Celular: cabeçalho compacto, formulário primeiro e botão de envio na largura toda. */
+@media (max-width: 720px) {
+  .page { padding-block: max(18px, env(safe-area-inset-top, 0px)) max(32px, env(safe-area-inset-bottom, 0px)); }
+  .head { gap: 12px; padding-bottom: 16px; align-items: flex-start; }
+  .head .mark { width: 46px; height: 22px; margin-top: 3px; }
+  .head .rule { display: none; }
+  h1 { font-size: 28px; }
+  .layout { margin-top: 20px; gap: 22px; }
+  .layout .aside { order: 0; padding: 16px; }
+  form { gap: 18px; }
+  .seg label { padding: 12px 4px; font-size: 14px; }
+  .actions { flex-direction: column; align-items: stretch; }
+  .actions .btn { width: 100%; justify-content: center; min-height: 48px; font-size: 15px; }
+  .done { padding: 20px; }
+  .done h2 { font-size: 26px; }
+  .done .row .btn { flex: 1 1 0; justify-content: center; }
+}
+</style>
+</head>
+<body>
+<div class="page wrap">
+  <header class="head">
+    <div class="mark" role="img" aria-label="AW Corp"></div>
+    <div class="rule" aria-hidden="true"></div>
+    <div>
+      <div class="eyebrow">Projeto Tathi Deândhela · Gigantes no Palco</div>
+      <h1>Solicitar uma <em>demanda</em></h1>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div>
+      <form id="form" novalidate>
+        <div class="field">
+          <label for="quem">Quem está pedindo <span class="req">*</span></label>
+          <select id="quem" required>
+            <option value="">Selecione seu nome</option>
+          </select>
+          <input type="text" id="quem-outro" placeholder="Seu nome e de qual time você é" style="margin-top:6px" hidden>
+        </div>
+
+        <div class="field">
+          <label for="titulo">O que você precisa, em uma frase <span class="req">*</span></label>
+          <input type="text" id="titulo" maxlength="200" placeholder="Ex.: Criativo de anúncio para o lote 1 com depoimento de aluna" required>
+        </div>
+
+        <div class="field">
+          <label for="descricao">Detalhes do pedido <span class="req">*</span></label>
+          <textarea id="descricao" rows="8" maxlength="8000" required placeholder="Qual é o objetivo? Onde isso vai ser usado? Tem formato, tamanho ou texto definido? O que já existe e o que falta?"></textarea>
+        </div>
+
+        <div class="two">
+          <div class="field">
+            <label for="tipo">Tipo de demanda</label>
+            <select id="tipo">
+              <option value="">Escolha um tipo</option>
+              <option>Copy e texto</option>
+              <option>Design e criativo</option>
+              <option>Vídeo e edição</option>
+              <option>Página e site</option>
+              <option>Tráfego e anúncios</option>
+              <option>Evento e produção</option>
+              <option>Comercial e patrocínio</option>
+              <option>Outro</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="prazo">Para quando você precisa</label>
+            <input type="date" id="prazo">
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="lbl" id="urg-lbl">Urgência</div>
+          <div class="seg" role="radiogroup" aria-labelledby="urg-lbl">
+            <label><input type="radio" name="urg" value="baixa"><span>Pode esperar</span></label>
+            <label><input type="radio" name="urg" value="media" checked><span>Normal</span></label>
+            <label><input type="radio" name="urg" value="alta"><span>Urgente</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="lbl">Links de referência</div>
+          <div class="rows" id="links"></div>
+          <button class="link-btn" type="button" id="add-link">+ Adicionar outro link</button>
+          <div class="hint">Drive, documento, exemplo de anúncio, post. Use links que comecem com https://.</div>
+        </div>
+
+        <div class="field">
+          <label for="contato">Contato para dúvidas</label>
+          <input type="text" id="contato" maxlength="200" placeholder="WhatsApp ou e-mail (opcional)">
+        </div>
+
+        <div class="hp" aria-hidden="true"><label for="site">Não preencha</label><input type="text" id="site" tabindex="-1" autocomplete="off"></div>
+
+        <div class="actions">
+          <button class="btn primary" type="submit" id="enviar">Enviar pedido</button>
+          <span class="err" id="err" role="alert"></span>
+        </div>
+      </form>
+
+      <div class="done" id="done" hidden>
+        <div class="eyebrow">Pedido recebido</div>
+        <h2>Obrigado, <span id="done-nome"></span>.</h2>
+        <p>Seu pedido já apareceu na coluna Solicitações do painel. A gestão do projeto avalia, define quem executa e o prazo, e o card muda de coluna quando entrar em produção.</p>
+        <div class="row">
+          <a class="btn primary" href="./">Ver o painel</a>
+          <button class="btn" type="button" id="outro">Fazer outro pedido</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="aside">
+      <div class="section-label">Como funciona</div>
+      <ol>
+        <li><b>Você envia o pedido</b> por aqui, com o máximo de contexto.</li>
+        <li><b>A gestão da AW avalia</b> o que precisa ser feito e se o prazo cabe no cronograma.</li>
+        <li><b>O pedido vira uma demanda</b> com responsável e prazo, e você acompanha pelo painel.</li>
+      </ol>
+      <a href="./">Abrir o painel do projeto ↗</a>
+    </aside>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="supabase.js"></script>
+<script>
+(function () {
+  const cfg = window.PAINEL_CONFIG;
+  const sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey, { auth: { persistSession: false, autoRefreshToken: false } });
+  const $ = id => document.getElementById(id);
+  const PADRAO = [
+    { nome: "Tathi", time: "Instituto" }, { nome: "Vivi", time: "Instituto" }, { nome: "Camila", time: "Instituto" },
+    { nome: "André", time: "AW" }, { nome: "Rafael", time: "AW" }, { nome: "Lorenzo", time: "AW" }, { nome: "Rodolfo", time: "AW" },
+  ];
+  const ERROS = {
+    campos_obrigatorios: "Preencha quem está pedindo, o resumo e os detalhes.",
+    pedido_grande: "O pedido ficou grande demais. Resuma os detalhes e coloque o resto num documento com link.",
+    muitos_pedidos: "Chegaram muitos pedidos em sequência. Tente de novo em alguns minutos.",
+  };
+  let pessoas = PADRAO;
+
+  function montarPessoas() {
+    const sel = $("quem"); const atual = sel.value;
+    sel.replaceChildren(new Option("Selecione seu nome", ""));
+    const grupos = [["Instituto", "Time Instituto Deândhela"], ["AW", "Time AW Corp"], ["Outro", "Outros"]];
+    for (const [t, rot] of grupos) {
+      const lista = pessoas.filter(p => (p.time || "AW") === t);
+      if (!lista.length) continue;
+      const g = document.createElement("optgroup"); g.label = rot;
+      lista.forEach(p => { const o = new Option(p.nome + (p.papel ? " · " + p.papel.replace(/\s*\((AW|Instituto)\)\s*$/, "") : ""), p.nome); o.dataset.time = t; g.append(o); });
+      sel.append(g);
+    }
+    const o = new Option("Outra pessoa", "__outro"); sel.append(o);
+    sel.value = atual;
+  }
+  $("quem").addEventListener("change", () => { const outro = $("quem").value === "__outro"; $("quem-outro").hidden = !outro; if (outro) $("quem-outro").focus(); });
+
+  function linkRow() {
+    const row = document.createElement("div"); row.className = "lrow";
+    const a = document.createElement("input"); a.type = "text"; a.placeholder = "Nome do link"; a.setAttribute("aria-label", "Nome do link"); a.className = "lnome";
+    const b = document.createElement("input"); b.type = "url"; b.placeholder = "https://..."; b.setAttribute("aria-label", "Endereço do link"); b.className = "lurl";
+    const x = document.createElement("button"); x.type = "button"; x.className = "icon-btn"; x.textContent = "×"; x.setAttribute("aria-label", "Remover link");
+    x.onclick = () => { row.remove(); if (!$("links").children.length) linkRow(); };
+    row.append(a, b, x); $("links").append(row);
+    $("add-link").hidden = $("links").children.length >= 5;
+    return row;
+  }
+  linkRow();
+  $("add-link").onclick = () => linkRow().querySelector("input").focus();
+
+  $("form").addEventListener("submit", async e => {
+    e.preventDefault();
+    $("err").textContent = "";
+    if ($("site").value) return;
+    const sel = $("quem");
+    const outro = sel.value === "__outro";
+    const nome = outro ? $("quem-outro").value.trim() : sel.value;
+    const opt = sel.selectedOptions[0];
+    const time = outro ? "Outro" : (opt && opt.dataset.time) || "";
+    const titulo = $("titulo").value.trim(), descricao = $("descricao").value.trim();
+    if (!nome) { $("err").textContent = "Diga quem está pedindo."; (outro ? $("quem-outro") : sel).focus(); return; }
+    if (!titulo) { $("err").textContent = "Escreva em uma frase o que você precisa."; $("titulo").focus(); return; }
+    if (!descricao) { $("err").textContent = "Conte os detalhes do pedido."; $("descricao").focus(); return; }
+    const links = [];
+    for (const r of $("links").children) {
+      const url = r.querySelector(".lurl").value.trim(); const label = r.querySelector(".lnome").value.trim();
+      if (!url) continue;
+      if (!/^https?:\/\//i.test(url)) { $("err").textContent = "Os links precisam começar com https://"; r.querySelector(".lurl").focus(); return; }
+      links.push({ label, url });
+    }
+    const btn = $("enviar"); btn.disabled = true; btn.textContent = "Enviando...";
+    try {
+      const { error } = await sb.rpc("tathi_solicitar", { p: {
+        solicitante: nome, time, titulo, descricao,
+        tipo: $("tipo").value, prazo: $("prazo").value,
+        urgencia: (document.querySelector("input[name=urg]:checked") || {}).value || "media",
+        links, contato: $("contato").value.trim(),
+      } });
+      if (error) throw error;
+      $("done-nome").textContent = nome.split(" ")[0];
+      $("form").hidden = true; $("done").hidden = false;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (err) {
+      const m = (err && err.message) || "";
+      $("err").textContent = Object.keys(ERROS).find(k => m.includes(k)) ? ERROS[Object.keys(ERROS).find(k => m.includes(k))] : "Não foi possível enviar agora. Confira a internet e tente de novo.";
+    } finally { btn.disabled = false; btn.textContent = "Enviar pedido"; }
+  });
+  $("outro").onclick = () => {
+    const quem = $("quem").value, outroNome = $("quem-outro").value;
+    $("form").reset(); $("links").replaceChildren(); linkRow();
+    $("quem").value = quem; $("quem-outro").value = outroNome; $("quem-outro").hidden = quem !== "__outro";
+    $("done").hidden = true; $("form").hidden = false; $("titulo").focus();
+  };
+
+  montarPessoas();
+  sb.from("tathi_projeto").select("data").eq("id", "geral").maybeSingle().then(({ data }) => {
+    const lista = data && data.data && data.data.pessoas;
+    if (Array.isArray(lista) && lista.length) { pessoas = lista; montarPessoas(); }
+  });
+})();
+</script>
+</body>
+</html>
