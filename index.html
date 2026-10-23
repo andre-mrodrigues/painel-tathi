@@ -127,10 +127,10 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
 .notice b { color: var(--fg); }
 
 /* ---------- Modais ---------- */
-.overlay { position: fixed; inset: 0; z-index: 20; background: var(--scrim); display: flex; justify-content: center; align-items: flex-start; overflow-y: auto;
+.camada { position: fixed; inset: 0; z-index: 20; background: var(--scrim); display: flex; justify-content: center; align-items: flex-start; overflow-y: auto;
   padding: max(24px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(24px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
-.modal { background: var(--bg); border: 1px solid var(--line-2); width: 100%; max-width: 840px; box-shadow: var(--shadow); }
-.modal.sm { max-width: 400px; }
+.janela { background: var(--bg); border: 1px solid var(--line-2); width: 100%; max-width: 840px; box-shadow: var(--shadow); }
+.janela.sm { max-width: 400px; }
 .m-head { padding: 18px 22px 14px; border-bottom: 1px solid var(--line); display: flex; gap: 12px; align-items: flex-start; }
 .m-head h2 { margin: 4px 0 0; font-size: 18px; font-weight: 700; flex: 1; overflow-wrap: anywhere; }
 #f-title-view { font-size: 20px; line-height: 1.3; }
@@ -219,9 +219,9 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
   .col { scroll-snap-align: start; min-height: 50vh; }
   .card { padding: 13px 14px 12px; }
 
-  .overlay { padding: 0; }
-  .modal { min-height: 100%; border: 0; display: flex; flex-direction: column; }
-  .modal.sm { min-height: 0; margin: 12vh 12px auto; border: 1px solid var(--line-2); }
+  .camada { padding: 0; }
+  .janela { min-height: 100%; border: 0; display: flex; flex-direction: column; }
+  .janela.sm { min-height: 0; margin: 12vh 12px auto; border: 1px solid var(--line-2); }
   .m-head { position: sticky; top: 0; z-index: 2; background: var(--bg); padding: max(14px, env(safe-area-inset-top, 0px)) 16px 12px; }
   .m-head input { font-size: 18px; }
   #f-title-view { font-size: 18px; }
@@ -244,7 +244,7 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
       <div>
         <div class="eyebrow">AW Corp × Instituto Deândhela</div>
         <h1>Projeto Tathi Deândhela · <em>Gigantes no Palco</em></h1>
-        <div class="sub">Acompanhamento das entregas. Tudo rodando até 01/11. <span class="versao" title="Versão do painel">v23.10-b</span></div>
+        <div class="sub">Acompanhamento das entregas. Tudo rodando até 01/11. <span class="versao" title="Versão do painel">v23.10-c</span></div>
       </div>
     </div>
     <div class="top-right">
@@ -293,8 +293,8 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
 </main>
 
 <!-- Card -->
-<div class="overlay" id="ov-card" hidden>
-  <div class="modal" role="dialog" aria-modal="true" aria-label="Demanda">
+<div class="camada" id="ov-card" hidden>
+  <div class="janela" aria-label="Demanda">
     <div class="m-head">
       <input type="text" id="f-title" placeholder="Título da demanda" aria-label="Título">
       <h2 id="f-title-view" hidden></h2>
@@ -353,8 +353,8 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
 </div>
 
 <!-- Login -->
-<div class="overlay" id="ov-login" hidden>
-  <form class="modal sm" id="form-login" role="dialog" aria-modal="true" aria-labelledby="login-title">
+<div class="camada" id="ov-login" hidden>
+  <form class="janela sm" id="form-login" aria-labelledby="login-title">
     <div class="m-head"><h2 id="login-title">Entrar como administrador</h2><button class="icon-btn" type="button" data-close aria-label="Fechar" style="font-size:20px">×</button></div>
     <div class="m-body one">
       <div class="field">
@@ -373,8 +373,8 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
 </div>
 
 <!-- Configurar projeto -->
-<div class="overlay" id="ov-cfg" hidden>
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cfg-title">
+<div class="camada" id="ov-cfg" hidden>
+  <div class="janela" aria-labelledby="cfg-title">
     <div class="m-head"><h2 id="cfg-title">Configurar o projeto</h2><button class="icon-btn" type="button" data-close aria-label="Fechar" style="font-size:20px">×</button></div>
     <div class="m-body one">
       <div class="cfg-sec" id="sec-marcos">
@@ -466,7 +466,7 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
   function iniciais(nome) { return (nome || "?").trim().split(/\s+/).map(p => p[0]).slice(0, 2).join("").toUpperCase(); }
   function safeUrl(u) { try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : null; } catch { return null; } }
   function msgErro(e) { const m = (e && e.message) || ""; for (const k in ERROS) if (m.includes(k)) return ERROS[k]; return "Não foi possível salvar agora. Confira a conexão e tente de novo."; }
-  function toast(msg) { document.querySelectorAll(".toast").forEach(x => x.remove()); const t = el("div", { class: "toast", role: "status", text: msg }); document.body.append(t); setTimeout(() => t.remove(), 2600); }
+  function toast(msg, ms) { document.querySelectorAll(".toast").forEach(x => x.remove()); const t = el("div", { class: "toast", role: "status", text: msg }); document.body.append(t); setTimeout(() => t.remove(), ms || 2600); }
   function novoId() { return "c-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6); }
 
   /* ---------- Admin ---------- */
@@ -518,20 +518,29 @@ input.search { width: 200px; max-width: 100%; flex: 0 1 200px; }
   }
 
   /* ---------- Overlays ---------- */
-  function abrirOverlay(id) { $(id).hidden = false; document.body.style.overflow = "hidden"; }
+  function abrirOverlay(id) {
+    $(id).hidden = false; document.body.style.overflow = "hidden";
+    // Se a janela abriu mas não ficou visível (ex.: extensão do navegador escondendo), mostra o diagnóstico.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const ov = $(id), m = ov.querySelector(".janela"); if (ov.hidden || !m) return;
+      const r = m.getBoundingClientRect(), cs = getComputedStyle(m), co = getComputedStyle(ov);
+      if (r.height < 40 || r.width < 40 || r.bottom < 0 || r.top > innerHeight || cs.display === "none" || cs.visibility !== "visible" || +cs.opacity < .1 || co.display === "none")
+        toast("Diagnóstico: janela " + Math.round(r.width) + "x" + Math.round(r.height) + " em " + Math.round(r.left) + "," + Math.round(r.top) + " · " + cs.display + "/" + cs.visibility + "/" + cs.opacity + " · tela " + innerWidth + "x" + innerHeight, 15000);
+    }));
+  }
   function fecharOverlay(id) {
     $(id).hidden = true;
-    if ([...document.querySelectorAll(".overlay")].every(o => o.hidden)) document.body.style.overflow = "";
+    if ([...document.querySelectorAll(".camada")].every(o => o.hidden)) document.body.style.overflow = "";
     if (id === "ov-card") { editingId = null; draft = null; if (location.hash.startsWith("#d=")) history.replaceState(null, "", location.pathname + location.search); }
     if (id === "ov-cfg") cfgDraft = null;
   }
-  document.querySelectorAll(".overlay").forEach(ov => {
+  document.querySelectorAll(".camada").forEach(ov => {
     ov.addEventListener("mousedown", e => { if (e.target === ov) fecharOverlay(ov.id); });
     ov.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => fecharOverlay(ov.id)));
   });
   document.addEventListener("keydown", e => {
     if (e.key !== "Escape") return;
-    const aberto = [...document.querySelectorAll(".overlay")].reverse().find(o => !o.hidden);
+    const aberto = [...document.querySelectorAll(".camada")].reverse().find(o => !o.hidden);
     if (aberto) fecharOverlay(aberto.id);
   });
 
